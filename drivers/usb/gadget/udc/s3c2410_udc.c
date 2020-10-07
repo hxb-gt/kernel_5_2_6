@@ -8,7 +8,9 @@
  *	Additional cleanups by Ben Dooks <ben-linux@fluff.org>
  */
 
+#define DEBUG
 #define pr_fmt(fmt) "s3c2410_udc: " fmt
+#define dev_fmt(fmt) "s3c2410_udc: " fmt
 
 #include <linux/module.h>
 #include <linux/kernel.h>
@@ -83,7 +85,7 @@ static struct s3c2410_udc_mach_info *udc_info;
 #define DEBUG_VERBOSE	2
 
 #ifdef CONFIG_USB_S3C2410_DEBUG
-#define USB_S3C2410_DEBUG_LEVEL 0
+#define USB_S3C2410_DEBUG_LEVEL 3
 
 static uint32_t s3c2410_ticks = 0;
 
@@ -1756,6 +1758,8 @@ static int s3c2410_udc_probe(struct platform_device *pdev)
 		dev_err(dev, "failed to get usb bus clock source\n");
 		return PTR_ERR(usb_bus_clock);
 	}
+	
+	dev_dbg(&pdev->dev, "usb_bus_clock rate: %lu\n", clk_get_rate(usb_bus_clock));
 
 	clk_prepare_enable(usb_bus_clock);
 
@@ -1764,6 +1768,8 @@ static int s3c2410_udc_probe(struct platform_device *pdev)
 		dev_err(dev, "failed to get udc clock source\n");
 		return PTR_ERR(udc_clock);
 	}
+	
+	dev_dbg(&pdev->dev, "udc_clock rate: %lu\n", clk_get_rate(udc_clock));
 
 	clk_prepare_enable(udc_clock);
 

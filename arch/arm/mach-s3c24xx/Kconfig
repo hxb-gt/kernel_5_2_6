@@ -528,6 +528,15 @@ config SMDK2440_CPU2440
 	default y if ARCH_S3C2440
 	select S3C2440_XTAL_16934400
 
+config MACH_EMBEDSKY2440
+	bool "embedsky S3C2440 board"
+	select S3C2440_XTAL_16934400
+	select S3C24XX_SMDK
+	select S3C_DEV_NAND
+	select S3C_DEV_USB_HOST
+	help
+	  Say Y here if you are using the SMDK2440.
+
 endif	# CPU_S3C2440
 
 if CPU_S3C2442

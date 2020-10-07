@@ -9,6 +9,8 @@
  *	Ben Dooks <ben@simtec.co.uk>
  *	Sascha Hauer <s.hauer@pengutronix.de>
  */
+ 
+ //#define DEBUG
 
 #include <linux/module.h>
 #include <linux/ioport.h>
@@ -54,7 +56,7 @@ MODULE_PARM_DESC(watchdog, "transmit timeout in milliseconds");
 /*
  * Debug messages level
  */
-static int debug;
+static int debug = 0x7;
 module_param(debug, int, 0644);
 MODULE_PARM_DESC(debug, "dm9000 debug level (0-6)");
 
@@ -405,7 +407,7 @@ static void dm9000_set_io(struct board_info *db, int byte_width)
 static void dm9000_schedule_poll(struct board_info *db)
 {
 	if (db->type == TYPE_DM9000E)
-		schedule_delayed_work(&db->phy_poll, HZ * 2);
+		schedule_delayed_work(&db->phy_poll, 1);
 }
 
 static int dm9000_ioctl(struct net_device *dev, struct ifreq *req, int cmd)
@@ -1011,6 +1013,47 @@ static void dm9000_send_packet(struct net_device *dev,
 	iow(dm, DM9000_TCR, TCR_TXREQ);	/* Cleared after TX complete */
 }
 
+//#define PRINT_PACKET
+
+#ifdef 	PRINT_PACKET	
+
+#define DM9000_BUF_LEN	1024
+char dgb_buf[DM9000_BUF_LEN];
+				   
+static void debug_pkt(struct sk_buff *skb)
+{
+	static int packet_index = 0;
+	unsigned char *data = skb->data;
+	int len = skb->len;
+	int i, size = 0;
+	
+	data += skb->dev->hard_header_len;
+	len -= skb->dev->hard_header_len;
+	if (len == 0) {
+		printk("empty packet\n");
+		return;
+	}
+	size += snprintf(dgb_buf + size, DM9000_BUF_LEN, "-----------------------------------\n");
+	size += snprintf(dgb_buf + size, DM9000_BUF_LEN, "packet %04d, len %d :\n", packet_index, len);
+	for (i = 0; i < len; i++) {
+		if (i % 2 == 0 && i != 0)
+			size += snprintf(dgb_buf + size, DM9000_BUF_LEN, " ");
+		
+		if (i % 16 == 0 && i != 0)
+			size += snprintf(dgb_buf + size, DM9000_BUF_LEN, "\n");
+		
+		size += snprintf(dgb_buf + size, DM9000_BUF_LEN, "%02x",data[i]);
+		
+	}
+	size += snprintf(dgb_buf + size, DM9000_BUF_LEN, "\n-----------------------------------\n");
+
+	printk("%s",dgb_buf);
+	packet_index ++;
+}
+#else
+	static void debug_pkt(struct sk_buff *skb) { }
+#endif
+
 /*
  *  Hardware start transmission.
  *  Send a packet to media from the upper layer.
@@ -1025,12 +1068,14 @@ dm9000_start_xmit(struct sk_buff *skb, struct net_device *dev)
 
 	if (db->tx_pkt_cnt > 1)
 		return NETDEV_TX_BUSY;
+	
+	debug_pkt(skb);
 
 	spin_lock_irqsave(&db->lock, flags);
 
 	/* Move data to DM9000 TX RAM */
 	writeb(DM9000_MWCMD, db->io_addr);
-
+	
 	(db->outblk)(db->io_data, skb->data, skb->len);
 	dev->stats.tx_bytes += skb->len;
 
@@ -1429,6 +1474,8 @@ dm9000_probe(struct platform_device *pdev)
 	struct regulator *power;
 	bool inv_mac_addr = false;
 
+	printk("dm9000 probe start\n");
+	
 	power = devm_regulator_get(dev, "vcc");
 	if (IS_ERR(power)) {
 		if (PTR_ERR(power) == -EPROBE_DEFER)

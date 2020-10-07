@@ -149,7 +149,7 @@ ENDPROC(ret_to_user)
  */
 ENTRY(ret_from_fork)
 	bl	schedule_tail
-	cmp	r5, #0
+	cmp	r5, #0		/* r5 != 0 说明是一个内核线程，r5是内核线程地址，r4是线程参数 */
 	movne	r0, r4
 	badrne	lr, 1f
 	retne	r5

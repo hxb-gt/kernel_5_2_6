@@ -33,6 +33,8 @@
  *              --  Chris Novakovic <chris@chrisn.me.uk>, April 2018
  */
 
+#define DEBUG		1
+
 #include <linux/types.h>
 #include <linux/string.h>
 #include <linux/kernel.h>
@@ -254,6 +256,8 @@ static int __init ic_open_devs(void)
 			last = &d->next;
 			d->flags = oflags;
 			d->able = able;
+			
+			pr_debug("able & IC_BOOTP %x\n", able);
 			if (able & IC_BOOTP)
 				get_random_bytes(&d->xid, sizeof(__be32));
 			else
@@ -263,6 +267,7 @@ static int __init ic_open_devs(void)
 				 dev->name, able, d->xid);
 		}
 	}
+	pr_debug("if (!ic_first_dev)\n");
 
 	/* no point in waiting if we could not bring up at least one device */
 	if (!ic_first_dev)

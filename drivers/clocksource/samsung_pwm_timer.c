@@ -277,6 +277,8 @@ static void __init samsung_clockevent_init(void)
 	clock_rate = pclk / (pwm.tscaler_div * pwm.tdiv);
 	pwm.clock_count_per_tick = clock_rate / HZ;
 
+	printk("-------tcnt_max :%d\n", pwm.tcnt_max);
+
 	time_event_device.cpumask = cpumask_of(0);
 	clockevents_config_and_register(&time_event_device,
 						clock_rate, 1, pwm.tcnt_max);

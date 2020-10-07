@@ -12,13 +12,6 @@
  * Wan ZongShun <mcuos.com@gmail.com>
  */
 
-#define IODESC_ENT(y)                                  \
-{                                                      \
-       .virtual = (unsigned long)W90X900_VA_##y,       \
-       .pfn     = __phys_to_pfn(W90X900_PA_##y),       \
-       .length  = W90X900_SZ_##y,                      \
-       .type    = MT_DEVICE,                           \
-}
 
 #define NUC900_8250PORT(name)					\
 {								\

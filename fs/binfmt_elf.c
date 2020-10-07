@@ -1093,7 +1093,7 @@ out_free_interp:
 			 * adjustment
 			 */
 			interp_load_addr = elf_entry;
-			elf_entry += loc->interp_elf_ex.e_entry;
+			elf_entry += loc->interp_elf_ex.e_entry;/*  动态链接器入口地址为相对地址 */
 		}
 		if (BAD_ADDR(elf_entry)) {
 			retval = IS_ERR((void *)elf_entry) ?
