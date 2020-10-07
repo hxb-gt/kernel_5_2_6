@@ -244,17 +244,17 @@ copy_thread(unsigned long clone_flags, unsigned long stack_start,
 
 	if (likely(!(p->flags & PF_KTHREAD))) {
 		*childregs = *current_pt_regs();
-		childregs->ARM_r0 = 0;
+		childregs->ARM_r0 = 0;/*  子进程反回0       */
 		if (stack_start)
 			childregs->ARM_sp = stack_start;
-	} else {
+	} else {/*  内核线程      */
 		memset(childregs, 0, sizeof(struct pt_regs));
 		thread->cpu_context.r4 = stk_sz;
 		thread->cpu_context.r5 = stack_start;
 		childregs->ARM_cpsr = SVC_MODE;
 	}
 	thread->cpu_context.pc = (unsigned long)ret_from_fork;
-	thread->cpu_context.sp = (unsigned long)childregs;
+	thread->cpu_context.sp = (unsigned long)childregs;/* 新进程的栈只有一个栈帧，就是上面设置的 */
 
 	clear_ptrace_hw_breakpoint(p);
 

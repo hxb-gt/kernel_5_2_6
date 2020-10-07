@@ -476,7 +476,9 @@ static int __init mount_nfs_root(void)
 	err = nfs_root_data(&root_dev, &root_data);
 	if (err != 0)
 		return 0;
-
+	
+	printk("root_dev:%s   root_data:%s\n",root_dev, root_data);
+	
 	/*
 	 * The server or network may not be ready, so try several
 	 * times.  Stop after a few tries in case the client wants

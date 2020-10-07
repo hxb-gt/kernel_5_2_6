@@ -1518,6 +1518,7 @@ int pskb_expand_head(struct sk_buff *skb, int nhead, int ntail,
 	 * is not we can just drop the old head and let the existing refcount
 	 * be since all we did is relocate the values
 	 */
+	//释放之前的数据
 	if (skb_cloned(skb)) {
 		if (skb_orphan_frags(skb, gfp_mask))
 			goto nofrags;

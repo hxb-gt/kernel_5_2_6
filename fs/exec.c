@@ -1819,6 +1819,7 @@ static int __do_execve_file(int fd, struct filename *filename,
 	would_dump(bprm, bprm->file);
 
 	retval = exec_binprm(bprm);
+	
 	if (retval < 0)
 		goto out;
 
@@ -1828,7 +1829,7 @@ static int __do_execve_file(int fd, struct filename *filename,
 	membarrier_execve(current);
 	rseq_execve(current);
 	acct_update_integrals(current);
-	task_numa_free(current);
+	task_numa_free(current, false);
 	free_bprm(bprm);
 	kfree(pathbuf);
 	if (filename)
@@ -1857,6 +1858,8 @@ out_files:
 out_ret:
 	if (filename)
 		putname(filename);
+	
+	printk("%s,%d\n",__FILE__, __LINE__);
 	return retval;
 }
 
